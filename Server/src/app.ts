@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 
 const app = express();
 dotenv.config(); //read the .env file 
 
-app.get('/test', (req, res, next) => {
+app.get('/test', (req: Request, res: Response, next: NextFunction) => {
 	res.send('hello world');
 })
 
