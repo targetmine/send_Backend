@@ -10,5 +10,3 @@ COPY ["src/", "./src/"]
 RUN npm install
 RUN npm run build
 CMD ["node", "./dist/app.js"]
-
-EXPOSE 5000

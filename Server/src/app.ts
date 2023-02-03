@@ -1,13 +1,25 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 
+import { connectToDB, createRESTTable, createTable } from './controller/common';
+
 const app = express();
+app.use(express.json());
+
 dotenv.config(); //read the .env file 
 
-app.get('/test', (req: Request, res: Response, next: NextFunction) => {
-	res.send('hello world');
-})
+/* Requests for creating model in DB */
+
+
+/* Requests for querying model from DB */
+app.get('/', (req: Request, res: Response) => res.send('API is alive'));
+
+app.get('/test', connectToDB);
+
+app.post('/element/', createTable);
+app.post('/element/:name', createRESTTable);
+
 
 app.listen(process.env.PORT, ()=>{
 	console.log(`app is listening on port ${process.env.PORT}!`);
-})
+});
