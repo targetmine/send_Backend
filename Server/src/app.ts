@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 
 import { connectToDB, createRESTTable, createTable } from './controller/common';
+import { runContainer } from './controller/docker';
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,8 @@ app.get('/test', connectToDB);
 
 app.post('/element/', createTable);
 app.post('/element/:name', createRESTTable);
+
+app.get('/container/', runContainer);
 
 
 app.listen(process.env.PORT, ()=>{

@@ -16,7 +16,6 @@ export function connectToDB(req: Request, res: Response) {
 	pool.connect()
 		.then(()=>{
 			res.send('connected');
-
 		})
 		.catch(error =>{
 			console.log(error);
