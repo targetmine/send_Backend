@@ -1,8 +1,29 @@
 import { Request, Response } from 'express';
 import { Pool, QueryResult } from 'pg';
+
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+export interface Attribute{
+	name: string;
+	type: 'varchar(40)' | 'text' | 'integer' | 'double precision';
+	unique: boolean;
+}
+
+export interface Element{
+	name: string;
+	attributes: Attribute[];
+}
+
+export interface Relation{
+	name: string;
+	srcElement: string;
+	srcAttribute: string;
+	trgElement: string;
+	trgAttribute: string;
+	cardinality: 'one to one' | 'one to many' | 'many to one' | 'many to many';
+}
 
 const pool = new Pool({
 	host: process.env.DB_HOST,
@@ -26,18 +47,6 @@ export function connectToDB(req: Request, res: Response) {
 export function createRESTTable(req: Request, res: Response) {
 	console.log('restTable', req.params);
 	const name: string = req.params.name;
-	 pool.query(`create table ${name} (id int);`,[], (err: Error, result: QueryResult<any>) => {
-		if(err){ throw err; }
-		res
-			.status(200)
-			.send('finished');
-	});
-};
-
-/* this is for a request with data in the body of the request */
-export function createTable(req: Request, res: Response) {
-	console.log('body table', req.body);
-	const { name } = req.body;
 	 pool.query(`create table ${name} (id int);`,[], (err: Error, result: QueryResult<any>) => {
 		if(err){ throw err; }
 		res

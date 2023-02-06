@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "RESTful API with Node.js and Express for the Data Sharing project.",
   "main": "index.js",
-	"scripts": {
+  "scripts": {
     "start": "node ./dist/app.js",
     "dev": "nodemon -L -e ts --exec \"npm run build && npm start\"",
     "build": "tsc",
@@ -16,6 +16,7 @@
     "@babel/core": "^7.20.12",
     "@babel/node": "^7.20.7",
     "@babel/preset-env": "^7.20.2",
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.16",
     "@types/node": "^18.11.18",
     "@types/pg": "^8.6.6",

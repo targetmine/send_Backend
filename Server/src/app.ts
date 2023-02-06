@@ -1,28 +1,34 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
-import { connectToDB, createRESTTable, createTable } from './controller/common';
-import { runContainer } from './controller/docker';
+import { connectToDB, createRESTTable } from './controller/common';
+import { runContainer, createTables } from './controller/docker';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 dotenv.config(); //read the .env file 
 
-/* Requests for creating model in DB */
-
-
-/* Requests for querying model from DB */
+/* I'm alive request */
 app.get('/', (req: Request, res: Response) => res.send('API is alive'));
 
-app.get('/test', connectToDB);
+/* Requests for creating model in DB */
+app.get('/container/', runContainer);
+app.post('/tables/', createTables);
 
-app.post('/element/', createTable);
+/* Requests for querying model from DB */
+
+
+app.get('/tables/', connectToDB);
+
+
 app.post('/element/:name', createRESTTable);
 
-app.get('/container/', runContainer);
 
 
-app.listen(process.env.PORT, ()=>{
+
+app.listen(process.env.PORT, () => {
 	console.log(`app is listening on port ${process.env.PORT}!`);
 });
