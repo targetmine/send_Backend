@@ -1,8 +1,8 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
-import { connectToDB, createRESTTable } from './controller/common';
+import { createContainer } from './controller/common';
 import { runContainer, createTables, commitContainer } from './controller/docker';
 
 const app = express();
@@ -15,20 +15,10 @@ dotenv.config(); //read the .env file
 app.get('/', (req: Request, res: Response) => res.send('API is alive'));
 
 /* Requests for creating model in DB */
-app.get('/container/', runContainer);
-app.post('/tables/', createTables);
-
+app.post('/container/', createContainer);
 app.get('/commit/', commitContainer);
 
 /* Requests for querying model from DB */
-
-
-app.get('/tables/', connectToDB);
-
-
-app.post('/element/:name', createRESTTable);
-
-
 
 
 app.listen(process.env.PORT, () => {
