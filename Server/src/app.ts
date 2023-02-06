@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 
 import { connectToDB, createRESTTable } from './controller/common';
-import { runContainer, createTables } from './controller/docker';
+import { runContainer, createTables, commitContainer } from './controller/docker';
 
 const app = express();
 app.use(express.json());
@@ -17,6 +17,8 @@ app.get('/', (req: Request, res: Response) => res.send('API is alive'));
 /* Requests for creating model in DB */
 app.get('/container/', runContainer);
 app.post('/tables/', createTables);
+
+app.get('/commit/', commitContainer);
 
 /* Requests for querying model from DB */
 

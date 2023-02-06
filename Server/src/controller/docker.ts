@@ -16,10 +16,35 @@ const pool = new Pool({
 export function runContainer(req: Request, res: Response){
 	const ls = spawn('docker', ['run', 
   	'--name', `${process.env.DB_CONTAINER_NAME}`,
+		'--rm',
   	'-p', `${process.env.DB_PORT}:5432`,
-  	'-e', `POSTGRES_PASSWORD=${process.env.DB_PASSWORD}`, 
+  	'-e', `POSTGRES_PASSWORD=${process.env.DB_PASSWORD}`,
+		'-e', `PGDATA=${process.env.DB_PGDATA}`,
   	'-d',
   	'postgres']);
+	let out: string = '';
+	ls.stdout.on('data', data => {
+		out += `${data}`;
+    console.log(`stdout: ${data}`);
+	});
+	ls.stderr.on('data', data => {
+    out += `${data}`;
+		console.log(`stderr: ${data}`);
+	});
+	ls.on('error', (error) => {
+		console.log(`error: ${error.message}`);
+		res.status(500).send(error);
+	});
+	ls.on("close", code => {
+			console.log(`Process closed with code ${code}`);
+			res.send(out);
+	});
+}
+
+export function commitContainer(req: Request, res: Response){
+	const ls = spawn('docker', ['commit', 
+  	`${process.env.DB_CONTAINER_NAME}`,
+  	`${process.env.DOCKER_USER}/dataShare-data:latest`]);
 	let out: string = '';
 	ls.stdout.on('data', data => {
 		out += `${data}`;
