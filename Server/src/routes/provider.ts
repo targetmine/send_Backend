@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
-// import { commitContainer, runContainer } from '../docker/builder';
-// import { Element } from '../app';
-// import { createTable } from '../db/builder';
+import { provider } from '../db/provider' ;
+import { Element, Attribute } from '../extras';
 
 const router = express.Router();
 
@@ -11,17 +10,35 @@ router.get('/', (req: Request, res: Response) => {
 
 // make sure that the backend is actually connected to a postgres database
 // so that the model can be created and data uploaded
-router.get('/connected/', (req: Request, res: Response) =>{
-
+router.get('/connected/', async (req: Request, res: Response) =>{
+	const msg = await provider.query(
+		`select table_name `+
+		`from information_schema.tables `+
+		`where table_schema != 'pg_catalog' and table_schema != 'information_schema'`,
+		[]
+	);
+	res.send(msg);
 });
 
-router.post('/tables/', (req: Request, res: Response) => {
-	let message = 'Error: To be implemented\n';
-	res.status(503);
-	res.send(message);
+// add a list of elements (tables) to the database
+router.post('/elements/', async (req: Request, res: Response) => {
+	const eles = req.body;
+	let message = 'Success';
+	try{
+	eles.forEach(async (ele: Element) => {
+		let text = `CREATE TABLE ${ele.name} (`;
+		ele.attributes.forEach((att: Attribute, idx: number) => { 
+			if(idx !== 0) 
+				text += ', ' 
+			text += `${att.name} ${att.type}` ;
+		});
+		text += `);`;
 
 	
-// 	let eles = req.body[0];
+		await provider.query(text,[]);
+		 
+
+	// const { rows } = await provider.query(text, []);
 // 	let rels = req.body[1];
 // 	let message = 'tables created';
 // 	try{
@@ -31,26 +48,25 @@ router.post('/tables/', (req: Request, res: Response) => {
 // 		res.status(500);
 // 	}
 // 	res.send(message);
-// });
+		});
+	} catch(e: any){
+			res.status(409);
+			message = e.message;
+			console.error(`post provider/elements/\n${e.message}`);
+		}
 
 // router.post('/commit/', (req: Request, res: Response) => {
-// 	res.send(commitContainer());
+	res.send(message);
 
 });
 
-router.post('/element/:name', (req: Request, res: Response) => {
+router.put('/attribute/:element/:name', (req: Request, res: Response) => {
 	let message = 'Error: To be implemented\n';
 	res.status(503);
 	res.send(message);
 });
 
-router.post('/attribute/:element/:name', (req: Request, res: Response) => {
-	let message = 'Error: To be implemented\n';
-	res.status(503);
-	res.send(message);
-});
-
-router.post('/relation/:name', (req: Request, res: Response) => {
+router.put('/relation/:name', (req: Request, res: Response) => {
 	let message = 'Error: To be implemented\n';
 	res.status(503);
 	res.send(message);
