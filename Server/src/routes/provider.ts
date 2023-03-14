@@ -21,7 +21,7 @@ router.get('/connected/', async (req: Request, res: Response) =>{
 });
 
 // add a list of elements (tables) to the database
-router.post('/elements/', async (req: Request, res: Response) => {
+router.post('/elements/', (req: Request, res: Response) => {
 	const eles = req.body;
 	
 	let queries: Promise<string>[] = [];
@@ -33,7 +33,6 @@ router.post('/elements/', async (req: Request, res: Response) => {
 			text += `${att.name} ${att.type}` ;
 		});
 		text += `);`;
-		
 		queries.push(provider.query(text,[]));
 	}
 	
@@ -46,8 +45,6 @@ router.post('/elements/', async (req: Request, res: Response) => {
 			console.log(typeof(msgs), msgs);
 			res.status(409).json({error: msgs}); //.json sends the response
 		});
-	
-
 });
 
 router.put('/attribute/:element/:name', (req: Request, res: Response) => {
