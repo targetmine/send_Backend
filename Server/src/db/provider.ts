@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import { rejects } from 'assert';
+import { resolve } from 'path';
 
 dotenv.config();
 
@@ -14,33 +16,24 @@ const pool = new Pool({
 
 export namespace provider {
 
-	export async function query(text: string, params: any[]){
-		const start = Date.now();
-		try{
-			const res = await pool.query(text, params);
-			const duration = Date.now() - start;
-			console.log(`query executed ${text} ${duration} ${res.rowCount}`);
-			return res;
-		} catch (e: any){
-			throw new Error(`Error running query ${text}\n${e.message}`);
-		}
+	export function query(text: string, params: any[]): Promise<string>{
+		
+		return new Promise((resolve, reject) =>{
+			const start = Date.now();
+			pool
+				.query(text, params)
+				.then( res => {
+					const duration = Date.now() - start;
+					console.log(`OK: ${text} ${duration} ${res.rowCount}`);
+					resolve(`OK: ${text}`);
+				})
+				.catch(error => {
+					console.error(`ERROR: ${text}`);
+					reject(`${text}\n${error.message}`);
+				});
+		});
+
 
 	}
-
-	export async function createTable(tableName: string, columns: any[]){
-	// export function createTables(elements: Element[], relations: Relation[]) {
-		let text = `CREATE TABLE ${tableName} ( `;
-// 		columns.forEach((att: Attribute, idx: number) => { 
-// 			if(idx !== 0) text += ', ' 
-// 			text += `${att.name} ${att.type}` ;
-// 		});
-// 	text += `);`;
-
-// 	const start = Date.now();
-// 	const res = await pool.query(text);
-// 	const duration = Date.now() - start;
-// 	console.log(`query executed ${text} ${duration} ${res.rowCount}`);	
-// 	return res;
-}
 
 }

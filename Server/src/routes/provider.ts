@@ -23,9 +23,9 @@ router.get('/connected/', async (req: Request, res: Response) =>{
 // add a list of elements (tables) to the database
 router.post('/elements/', async (req: Request, res: Response) => {
 	const eles = req.body;
-	let message = 'Success';
-	try{
-	eles.forEach(async (ele: Element) => {
+	
+	let queries: Promise<string>[] = [];
+	for (const ele of eles){
 		let text = `CREATE TABLE ${ele.name} (`;
 		ele.attributes.forEach((att: Attribute, idx: number) => { 
 			if(idx !== 0) 
@@ -33,30 +33,20 @@ router.post('/elements/', async (req: Request, res: Response) => {
 			text += `${att.name} ${att.type}` ;
 		});
 		text += `);`;
-
+		
+		queries.push(provider.query(text,[]));
+	}
 	
-		await provider.query(text,[]);
-		 
-
-	// const { rows } = await provider.query(text, []);
-// 	let rels = req.body[1];
-// 	let message = 'tables created';
-// 	try{
-// 		eles.forEach(async (ele: Element) => await createTable(ele.name, ele.attributes));
-// 	} catch (error: any){
-// 		message = error.message;
-// 		res.status(500);
-// 	}
-// 	res.send(message);
+	Promise.all(queries)
+		.then((msgs)=>{
+			console.log(typeof(msgs), msgs);
+			res.status(200).json();
+		})
+		.catch((msgs)=>{
+			console.log(typeof(msgs), msgs);
+			res.status(409).json({error: msgs}); //.json sends the response
 		});
-	} catch(e: any){
-			res.status(409);
-			message = e.message;
-			console.error(`post provider/elements/\n${e.message}`);
-		}
-
-// router.post('/commit/', (req: Request, res: Response) => {
-	res.send(message);
+	
 
 });
 
