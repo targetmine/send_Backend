@@ -32,3 +32,37 @@ export function commitContainer(){
 	console.log(`docker commit exit - code: ${command.status} & signal: ${command.signal}`);
 	return `docker commit exit - code: ${command.status} & signal: ${command.signal}`;
 }
+
+// import { Request, Response } from 'express';
+// import { createTables, runContainer } from './docker';
+// import { connectToDB } from './query';
+
+// export function createContainer(req: Request, res: Response) {
+// 	let eles = req.body[0];
+// 	let rels = req.body[1];
+// 	runContainer()
+// 		.then((data)=>{
+// 			console.log(`Container running: ${data}`);
+// 			// res.send(data);
+// 			return connectToDB();
+// 		})
+// 		.then(()=>{
+// 			console.log('connected');
+// 			let pros = createTables(eles, rels);
+// 			// console.log(pros);
+// 			return Promise.all(pros); //true;
+// 			// return pros;
+// 		})
+// 		// .then((data) => {
+// 		// 	console.log(`Tables?: ${data}`);
+// 		// 	return Promise.all(data);
+// 		// })
+// 		.then(() => {
+// 			console.log('tables created');
+// 			return true;
+// 		})
+// 		.catch(error =>{
+// 			console.log('error', error);
+// 			res.status(500).send(error);
+// 		});
+// };
