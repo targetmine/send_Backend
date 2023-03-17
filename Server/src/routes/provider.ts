@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import { provider } from '../db/provider' ;
-import { Element, Attribute } from '../extras';
 
 const router = express.Router();
 
@@ -22,29 +21,15 @@ router.get('/connected/', async (req: Request, res: Response) =>{
 
 // add a list of elements (tables) to the database
 router.post('/elements/', (req: Request, res: Response) => {
-	const eles = req.body;
-	
-	let queries: Promise<string>[] = [];
-	for (const ele of eles){
-		let text = `CREATE TABLE ${ele.name} (`;
-		ele.attributes.forEach((att: Attribute, idx: number) => { 
-			if(idx !== 0) 
-				text += ', ' 
-			text += `${att.name} ${att.type}` ;
-		});
-		text += `);`;
-		queries.push(provider.query(text,[]));
-	}
-	
-	Promise.all(queries)
-		.then((msgs)=>{
-			console.log(typeof(msgs), msgs);
+	provider.createTables(req.body.tables)
+		.then((msg) => {
+			console.log(msg);
 			res.status(200).json();
 		})
-		.catch((msgs)=>{
-			console.log(typeof(msgs), msgs);
-			res.status(409).json({error: msgs}); 
-		});
+		.catch((error) => {
+			console.error(error);
+			res.status(409).json({error: error});
+		})
 });
 
 router.put('/element/:name', (req: Request, res: Response) => {
