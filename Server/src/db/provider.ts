@@ -36,4 +36,32 @@ export namespace provider {
 
 	}
 
+	export function insertTransaction(table: string, columns: string[], data: any[]): Promise<string>{
+		return new Promise(async (resolve, reject) =>{
+			const start = Date.now();
+			let count: number = 0;
+			const client = await pool.connect();
+			try{
+				await client.query('BEGIN');
+				const cols = columns.join();
+				for (const d of data){
+					const values = d.join();
+					const text = `INSERT INTO ${table} (${cols}) VALUES (${values});`
+					console.log(text);
+				
+					const result = await client.query(text, []);
+					count += result.rowCount;
+				}
+				await client.query('COMMIT');
+				resolve(`OK - Insert into ${table}; Row count: ${count}`);
+			} catch(e){
+				await client.query('ROLLBACK');
+				reject(e);
+			} finally {
+				client.release();
+			}
+
+		});
+	}
+
 }

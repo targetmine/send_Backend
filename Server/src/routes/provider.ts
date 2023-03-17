@@ -43,7 +43,19 @@ router.post('/elements/', (req: Request, res: Response) => {
 		})
 		.catch((msgs)=>{
 			console.log(typeof(msgs), msgs);
-			res.status(409).json({error: msgs}); //.json sends the response
+			res.status(409).json({error: msgs}); 
+		});
+});
+
+router.put('/element/:name', (req: Request, res: Response) => {
+	provider.insertTransaction(req.params.name, req.body.columns, req.body.data)
+		.then((msg) => {
+			console.log(msg);
+			res.status(200).json();
+		})
+		.catch((error) => {
+			console.error(error);
+			res.status(409).json({error: error});
 		});
 });
 
