@@ -7,7 +7,7 @@ import provider from './routes/provider';
 
 dotenv.config(); //read the .env file 
 const app = express();
-app.use(express.json());
+app.use(express.json({limit: '10mb'}));
 app.use(cors());
 
 /* import routes */
