@@ -33,7 +33,7 @@ router.post('/elements/', (req: Request, res: Response) => {
 });
 
 router.put('/element/:name', (req: Request, res: Response) => {
-	provider.insertTransaction(req.params.name, req.body.columns, req.body.data)
+	provider.insertTransaction(req.params.name, req.body.primaryKeys, req.body.columns, req.body.data)
 		.then((msg) => {
 			console.log(msg);
 			res.status(200).json();

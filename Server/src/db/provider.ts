@@ -61,44 +61,28 @@ export namespace provider {
 		});
 	}
 	
-	// let queries: Promise<string>[] = [];
-	// for (const ele of eles){
-	// 	let text = `CREATE TABLE ${ele.name} (`;
-	// 	ele.attributes.forEach((att: Attribute, idx: number) => { 
-	// 		if(idx !== 0) 
-	// 			text += ', ' 
-	// 		text += `${att.name} ${att.type}` ;
-	// 	});
-	// 	text += `);`;
-	// 	queries.push(provider.query(text,[]));
-	// }
-		// 		}
-			
-				
-		// 		const result = await client.query(text, params);
-				
-		// 		const duration = Date.now() - start;
-		// 		console.log(`OK: ${text} ${duration} ${res.rowCount}`);
-		// 		resolve(`OK: ${text}`);
-				
-		// 	} catch(error) {
-		// 			console.error(`ERROR: ${text}`);
-		// 			reject(`${text}\n${error.message}`);
-		// 		});
-		
-
-	
-	export function insertTransaction(table: string, columns: string[], data: any[]): Promise<string>{
+	export function insertTransaction(
+		table: string, 
+		primaryKeys: string[], 
+		columns: string[], 
+		data: any[]
+	): Promise<string>{
 		const start = Date.now();
 		let count: number = 0;
 		return new Promise(async (resolve, reject) =>{
 			const client = await pool.connect();
 			try{
 				await client.query('BEGIN');
+				const k = primaryKeys.join();
 				const cols = columns.join();
 				for (const d of data){
 					const values = d.join();
-					const text = `INSERT INTO ${table} (${cols}) VALUES (${values});`
+					let text = `INSERT INTO ${table} (${cols}) `+
+					`VALUES (${values}) `+
+					`ON CONFLICT (${k}) DO UPDATE SET `+
+					columns.map((c) => `${c} = excluded.${c}`).join()+
+					`;`;
+					
 					console.log(text);
 				
 					const result = await client.query(text, []);
