@@ -37,9 +37,10 @@ yarn-error.log
 testem.log
 /typings
 
-.env
-.curl-tests
-
 # System files
 .DS_Store
 Thumbs.db
+
+# Configuration
+.env
+.curl-tests
