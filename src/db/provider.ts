@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import * as fs from 'node:fs/promises';
 
 dotenv.config();
 
@@ -14,51 +15,68 @@ const pool = new Pool({
 
 export namespace provider {
 
-	export function query(text: string, params: any[]): Promise<string>{
-		
-		return new Promise((resolve, reject) =>{
-			const start = Date.now();
-			pool
-				.query(text, params)
-				.then( res => {
-					const duration = Date.now() - start;
-					console.log(`OK: ${text} ${duration} ${res.rowCount}`);
-					resolve(`OK: ${text}`);
-				})
-				.catch(error => {
-					console.error(`ERROR: ${text}`);
-					reject(`${text}\n${error.message}`);
-				});
+	export function saveModel(model:any): Promise<string>{
+		const result: Promise<string> = new Promise((resolve, reject) => {
+			const eles = JSON.stringify(model.elements);
+			const rels = JSON.stringify(model.relations);
+			const mod = `{\n\t"elements": ${eles},\n\t"relations": ${rels}\n}`;
+			fs.writeFile(`model.json`, mod);
 		});
+		return result;
 	}
 
-	export function createTables(tables: any[]): Promise<string>{
-		const start = Date.now();
-		let count = 0;
-		return new Promise( async (resolve, reject) =>{
+	// create a single table in the database
+	export async function createTable(table: any): Promise<string>{
+		const result: Promise<string> = new Promise(async(resolve, reject) => {
 			const client = await pool.connect();
 			try{
-				await client.query('BEGIN');
-				for (const table of tables){
-					const text =`CREATE TABLE ${table.name} (`+
-						`${table.columns.join()}, `+
-						`PRIMARY KEY (${table.primaryKeys.join()})`+
-						`);`
-					
-					const result = await client.query(text, []);
-					count += result.rowCount;
-				}
-				await client.query('COMMIT');
-				resolve(`OK - Create tables; Row count: ${count}`);
-			 } catch(e) {
-				await client.query('ROLLBACK');
-				reject(e);
-			 } finally {
+				const text =`CREATE TABLE ${table.name} (`+
+					`${table.columns.join()}, `+
+					`PRIMARY KEY (${table.primaryKeys.join()})`+
+					`);`
+				await client.query(text, []);
+				const msg = (`Create ${table.name} OK;`);
+				console.log(msg)
+				resolve(msg);
+			} catch(e: any) {
+				const msg = (`Create ${table.name} FAILED;`);
+				console.log(msg)
+				reject(msg);
+			} finally {
 				client.release();
-			 }
-
-
+			}
 		});
+		return result;
+	}
+
+	export function addColumn(table: string, columns: any[]): Promise<string>{
+		const result: Promise<string> = new Promise(async(resolve, reject) => {
+			const client = await pool.connect();
+			try{
+				await client.query('BEGIN'); // handle the addition of columns as transaction
+				let text = `ALTER TABLE ${table}\n`;
+				let i = 1;
+				for (const c of columns){
+					text += `ADD COLUMN ${c.name} ${c.type}`; // for each column
+					text += i < columns.length ? `,\n` : `;`;
+					i += 1;
+				}
+				const result = await client.query(text, []);
+				await client.query('COMMIT');
+				const msg = `ALTER TABLE ${table} OK;`;
+				console.log(msg);
+				resolve(msg)
+			} catch(e: any) {
+				// if there was any problem, rollback and reject with the error msg
+				await client.query('ROLLBACK'); 
+				const msg = `ALTER TABLE ${table} FAILED;`;
+				console.log(msg);
+				reject(msg);
+			} finally {
+				client.release();
+			}
+		});
+		return result;
 	}
 	
 	export function insertTransaction(
@@ -81,10 +99,7 @@ export namespace provider {
 					`VALUES (${values}) `+
 					`ON CONFLICT (${k}) DO UPDATE SET `+
 					columns.map((c) => `${c} = excluded.${c}`).join()+
-					`;`;
-					
-					console.log(text);
-				
+					`;`;			
 					const result = await client.query(text, []);
 					count += result.rowCount;
 				}
@@ -99,5 +114,4 @@ export namespace provider {
 
 		});
 	}
-
 }

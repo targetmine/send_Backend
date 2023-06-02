@@ -15,5 +15,5 @@ export interface Relation{
 	srcAttribute: string;
 	trgElement: string;
 	trgAttribute: string;
-	cardinality: 'one to one' | 'one to many' | 'many to one' | 'many to many';
+	cardinality: 'one to one' | 'one to many' | 'many to many';
 }
