@@ -17,3 +17,13 @@ export interface Relation{
 	trgAttribute: string;
 	cardinality: 'one to one' | 'one to many' | 'many to many';
 }
+
+export function toStringArray(foo: any): string[]|undefined{
+	if (!Array.isArray(foo)) return undefined;
+	let s: string[] = [];
+	foo.forEach(_ => {
+		if (typeof _ !== 'string') return undefined;
+		s.push(_ as string);
+	})
+	return s;
+}
