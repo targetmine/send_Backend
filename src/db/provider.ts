@@ -15,6 +15,7 @@ const pool = new Pool({
 
 export namespace provider {
 
+	// save the provided model as a JSON structured file in the database
 	export function saveModel(model:any): Promise<string>{
 		const result: Promise<string> = new Promise((resolve, reject) => {
 			const eles = JSON.stringify(model.elements);

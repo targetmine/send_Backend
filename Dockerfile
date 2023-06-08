@@ -9,4 +9,5 @@ COPY ["src/", "./src/"]
 # install all the packages
 RUN npm install
 RUN npm run build
+EXPOSE 5000
 CMD ["node", "./dist/app.js"]
