@@ -23,6 +23,7 @@ const { body } = new ExpressValidator({},
 
 // request to set the model in the database, including both elements and relations
 router.post('/model/', (req: Request, res: Response) => {
+	console.log(`POST /model/ requesth with ${JSON.stringify(req.body)}`);
 	provider.saveModel(req.body)
 	.then(msg => {
 		console.log(`POST /model/ request: ${msg}`);
@@ -38,11 +39,11 @@ router.post('/model/', (req: Request, res: Response) => {
 router.post('/element/', (req: Request, res: Response) => {
 	provider.createTable(req.body)
 	.then(msg => {
-		console.log(`POST /elements/ request: ${msg}`);
+		console.log(`POST /element/ request: ${msg}`);
 		res.status(200).json(msg);
 	}) 
 	.catch(error => {
-		console.error(`POST /elements/ request error: ${error.msg}`);
+		console.error(`POST /element/ request error: ${error.msg}`);
 		res.status(409).json({error: error.msg});
 	});
 });

@@ -20,3 +20,5 @@ app.use('/querier/', querier);
 app.listen(process.env.PORT, () => {
 	console.log(`app is listening on port ${process.env.PORT}!`);
 });
+
+process.on('uncaughtException', err => console.log(`Undhandled error ${err}`));

@@ -4,24 +4,36 @@ import * as fs from 'node:fs/promises';
 
 dotenv.config();
 
+// const pool = new Pool({
+// 	host: process.env.DB_HOST,
+// 	user: process.env.DB_USER,
+// 	database: process.env.DB_NAME,
+// 	password: process.env.DB_PASSWORD, 
+// 	port: parseInt(process.env.DB_PORT || '5432'),
+// 	idleTimeoutMillis: 1000 // close idle clients after one second
+// });
+
+const connectionString = 'postgresql://postgres:example@datasharing_db:5433/postgres';
 const pool = new Pool({
-	host: process.env.DB_HOST,
-	user: process.env.DB_USER,
-	database: process.env.DB_NAME,
-	password: process.env.DB_PASSWORD, 
-	port: parseInt(process.env.DB_PORT || '5432'),
-	idleTimeoutMillis: 1000 // close idle clients after one second
+	connectionString
 });
 
 export namespace provider {
 
 	// save the provided model as a JSON structured file in the database
 	export function saveModel(model:any): Promise<string>{
-		const result: Promise<string> = new Promise((resolve, reject) => {
-			const eles = JSON.stringify(model.elements);
-			const rels = JSON.stringify(model.relations);
-			const mod = `{\n\t"elements": ${eles},\n\t"relations": ${rels}\n}`;
-			fs.writeFile(`model.json`, mod);
+		const result: Promise<string> = new Promise(async(resolve, reject) => {
+			try{
+				const eles = JSON.stringify(model.elements);
+				const rels = JSON.stringify(model.relations);
+				const mod = `{\n\t"elements": ${eles},\n\t"relations": ${rels}\n}`;
+				await fs.writeFile(`${process.env.DATA_FOLDER}/model.json`, mod);
+				resolve('Writing MODEL OK;');
+			} catch(e: any){
+				const msg =(`Writing MODEL FAILED;`);
+				console.log(msg);
+				reject(msg);
+			}
 		});
 		return result;
 	}
@@ -29,23 +41,32 @@ export namespace provider {
 	// create a single table in the database
 	export async function createTable(table: any): Promise<string>{
 		const result: Promise<string> = new Promise(async(resolve, reject) => {
-			const client = await pool.connect();
 			try{
-				const text =`CREATE TABLE ${table.name} (`+
-					`${table.columns.join()}, `+
-					`PRIMARY KEY (${table.primaryKeys.join()})`+
-					`);`
-				await client.query(text, []);
-				const msg = (`Create ${table.name} OK;`);
-				console.log(msg)
-				resolve(msg);
+			
+				console.log(pool);
+				const client = await pool.connect();
+				try{
+					const text =`CREATE TABLE ${table.name} (`+
+						`${table.columns.join()}, `+
+						`PRIMARY KEY (${table.primaryKeys.join()})`+
+						`);`
+					await client.query(text, []);
+					const msg = (`Create ${table.name} OK;`);
+					console.log(msg)
+					resolve(msg);
+				} catch(e: any) {
+					const msg = (`Create ${table.name} FAILED;`);
+					console.log(msg)
+					reject(msg);
+				} finally {
+					client.release();
+				}
 			} catch(e: any) {
-				const msg = (`Create ${table.name} FAILED;`);
-				console.log(msg)
-				reject(msg);
-			} finally {
-				client.release();
+				const msg = `Create ${table.name} unable to connect to DB;`;
+				// console.log(msg);
+				reject({msg: msg});
 			}
+			
 		});
 		return result;
 	}
