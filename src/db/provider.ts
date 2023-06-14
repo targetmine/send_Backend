@@ -4,18 +4,13 @@ import * as fs from 'node:fs/promises';
 
 dotenv.config();
 
-// const pool = new Pool({
-// 	host: process.env.DB_HOST,
-// 	user: process.env.DB_USER,
-// 	database: process.env.DB_NAME,
-// 	password: process.env.DB_PASSWORD, 
-// 	port: parseInt(process.env.DB_PORT || '5432'),
-// 	idleTimeoutMillis: 1000 // close idle clients after one second
-// });
-
-const connectionString = 'postgresql://postgres:example@datasharing_db:5433/postgres';
 const pool = new Pool({
-	connectionString
+	host: process.env.DB_HOST,
+	user: process.env.DB_USER,
+	database: process.env.DB_NAME,
+	password: process.env.DB_PASSWORD, 
+	port: parseInt(process.env.DB_DOCKER_PORT || '5432'),
+	idleTimeoutMillis: 1000 // close idle clients after one second
 });
 
 export namespace provider {
@@ -42,7 +37,6 @@ export namespace provider {
 	export async function createTable(table: any): Promise<string>{
 		const result: Promise<string> = new Promise(async(resolve, reject) => {
 			try{
-			
 				console.log(pool);
 				const client = await pool.connect();
 				try{
@@ -62,7 +56,7 @@ export namespace provider {
 					client.release();
 				}
 			} catch(e: any) {
-				const msg = `Create ${table.name} unable to connect to DB;`;
+				const msg = `Create ${table.name} unable to connect to DB; ${e}`;
 				// console.log(msg);
 				reject({msg: msg});
 			}
