@@ -1,8 +1,6 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import * as fs from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { rejects } from 'node:assert';
 
 dotenv.config();
 
@@ -20,8 +18,8 @@ export namespace querier {
 	export function getModel(): Promise<any>{
 		const result: Promise<any> = new Promise(async(resolve, reject) => {
 			try{
-				const msg = await fs.readFile(`${process.env.DATA_FOLDER}/model.json`);
-				resolve(msg);
+				const msg = await fs.readFile(`${process.env.DATA_FOLDER}/model.json`, 'utf-8');
+				resolve(JSON.parse(msg));
 			} catch(e: any) {
 				const msg = `Retrieve MODEL FAILED;`;
 				console.log(msg);
